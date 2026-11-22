@@ -101,14 +101,22 @@
                 </div>
             </div>
 
-            <div class="bg-slate-50 px-6 py-4 border-t flex justify-between items-center">
+            <div class="bg-slate-50 px-6 py-4 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
                 <a href="{{ route('license.activate') }}" class="text-xs text-slate-600 hover:text-blue-600 underline">
-                    Ganti Kunci Lisensi
+                    Ganti Kunci / File Lisensi
                 </a>
-                <button wire:click="refreshLicense" wire:loading.attr="disabled" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50">
-                    <span wire:loading.remove>Refresh Lisensi Online</span>
-                    <span wire:loading>Memperbarui...</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button wire:click="downloadBackup" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-xs cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Cadangkan Lisensi (.lic)</span>
+                    </button>
+                    <button wire:click="refreshLicense" wire:loading.attr="disabled" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50">
+                        <span wire:loading.remove>Refresh Lisensi Online</span>
+                        <span wire:loading>Memperbarui...</span>
+                    </button>
+                </div>
             </div>
         @else
             <div class="p-8 text-center">

@@ -7,10 +7,28 @@ namespace App\Livewire\License;
 use App\Enums\LicenseFeature;
 use App\Services\Licensing\LicenseEntitlementService;
 use App\Services\Licensing\LicenseService;
+use Illuminate\Support\Facades\File;
 use Livewire\Component;
 
 class LicenseInfo extends Component
 {
+    public function downloadBackup(LicenseService $licenseService)
+    {
+        $path = $licenseService->getLicenseFilePath();
+        if (! File::exists($path)) {
+            session()->flash('error', 'File sertifikat lisensi lokal tidak ditemukan.');
+            return null;
+        }
+
+        $payload = $licenseService->getLicenseData();
+        $key = $payload['license_key'] ?? 'backup';
+        $filename = "activation_apt_{$key}.lic";
+
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
     public function refreshLicense(LicenseService $licenseService): void
     {
         try {

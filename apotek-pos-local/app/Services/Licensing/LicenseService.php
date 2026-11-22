@@ -192,4 +192,67 @@ class LicenseService
         // Return verified payload
         return $this->verifyOffline();
     }
+
+    /**
+     * Activate license offline using a signed certificate file (.lic content).
+     *
+     * @throws LicenseInvalidException
+     */
+    public function activateWithFileContent(string $rawContent): array
+    {
+        $cert = json_decode(trim($rawContent), true);
+        if (! is_array($cert) || ! isset($cert['payload_b64'], $cert['signature_b64'])) {
+            throw new LicenseInvalidException('Format file lisensi (.lic) rusak atau tidak valid.');
+        }
+
+        if (($cert['algorithm'] ?? '') !== 'Ed25519') {
+            throw new LicenseInvalidException('Algoritma sertifikat lisensi tidak didukung (harus Ed25519).');
+        }
+
+        $publicKeyB64 = config('license.public_key');
+        if (empty($publicKeyB64)) {
+            throw new LicenseInvalidException('LICENSE_PUBLIC_KEY belum dikonfigurasi di sistem POS.');
+        }
+
+        $publicKey = base64_decode($publicKeyB64, true);
+        $signature = base64_decode($cert['signature_b64'], true);
+
+        if ($publicKey === false || $signature === false) {
+            throw new LicenseInvalidException('Kunci publik atau tanda tangan digital dalam file lisensi rusak.');
+        }
+
+        // 1. Verify detached signature
+        $isValidSig = sodium_crypto_sign_verify_detached($signature, $cert['payload_b64'], $publicKey);
+        if (! $isValidSig) {
+            throw new LicenseInvalidException('Tanda tangan digital tidak valid! File lisensi telah dimanipulasi atau tidak diterbitkan oleh Laksana Hub.');
+        }
+
+        // 2. Decode payload
+        $payloadJson = base64_decode($cert['payload_b64'], true);
+        $payload = json_decode($payloadJson ?: '', true);
+
+        if (! is_array($payload) || ! isset($payload['license_key'], $payload['hwid'])) {
+            throw new LicenseInvalidException('Struktur payload sertifikat lisensi tidak valid.');
+        }
+
+        // 3. Verify Hardware ID binding
+        $currentHwid = $this->hwidService->getHwid();
+        if ($payload['hwid'] !== $currentHwid) {
+            throw new LicenseInvalidException(
+                sprintf('File lisensi ini terikat pada HWID mesin lain (%s). Mesin ini: %s', $payload['hwid'], $currentHwid)
+            );
+        }
+
+        // Save to target path
+        $filePath = $this->getLicenseFilePath();
+        File::ensureDirectoryExists(dirname($filePath));
+        File::put($filePath, json_encode($cert, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // Initialize last_seen_at
+        SystemMeta::set('license_last_seen_at', Crypt::encryptString(now()->toIso8601String()));
+
+        // Clear cached payload and verify
+        $this->cachedPayload = null;
+        return $this->verifyOffline();
+    }
 }

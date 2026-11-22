@@ -40,6 +40,7 @@ class LicenseVerificationTest extends TestCase
         config([
             'license.public_key' => $this->testKeypairPublic,
             'license.mock_hwid' => $this->mockHwid,
+            'license.cloud_hub_url' => 'http://127.0.0.1:8000',
             'license.license_file_path' => $this->licensePath,
             'license.terminal_id' => 'POS01',
         ]);
@@ -268,5 +269,52 @@ class LicenseVerificationTest extends TestCase
 
         $infoResponse = $this->get(route('license.info'));
         $infoResponse->assertStatus(200);
+    }
+
+    public function test_can_activate_offline_using_file_content_with_valid_signature_and_hwid(): void
+    {
+        $cert = $this->createSignedCertificate([
+            'license_key' => 'APT-OFFLINE-RESTORE-2026',
+            'customer_name' => 'Dokter Andi',
+            'pharmacy_name' => 'Apotek Sehat Offline',
+        ]);
+
+        $jsonString = json_encode($cert);
+
+        $licenseService = app(LicenseService::class);
+        $verifiedPayload = $licenseService->activateWithFileContent($jsonString);
+
+        $this->assertEquals('APT-OFFLINE-RESTORE-2026', $verifiedPayload['license_key']);
+        $this->assertEquals('Apotek Sehat Offline', $verifiedPayload['pharmacy_name']);
+        $this->assertTrue($licenseService->isActivated());
+        $this->assertFileExists($this->licensePath);
+    }
+
+    public function test_rejects_offline_activation_if_file_has_different_hwid(): void
+    {
+        $cert = $this->createSignedCertificate([
+            'hwid' => 'DIFFERENT_MACHINE_HWID_999',
+        ]);
+
+        $this->expectException(\App\Exceptions\LicenseInvalidException::class);
+        $this->expectExceptionMessage('File lisensi ini terikat pada HWID mesin lain');
+
+        $licenseService = app(LicenseService::class);
+        $licenseService->activateWithFileContent(json_encode($cert));
+    }
+
+    public function test_rejects_offline_activation_if_file_tampered(): void
+    {
+        $cert = $this->createSignedCertificate();
+        // Modify payload without resigning
+        $payload = json_decode(base64_decode($cert['payload_b64']), true);
+        $payload['plan'] = 'PRO_ENTERPRISE_HACKED';
+        $cert['payload_b64'] = base64_encode(json_encode($payload));
+
+        $this->expectException(\App\Exceptions\LicenseInvalidException::class);
+        $this->expectExceptionMessage('Tanda tangan digital tidak valid');
+
+        $licenseService = app(LicenseService::class);
+        $licenseService->activateWithFileContent(json_encode($cert));
     }
 }
