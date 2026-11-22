@@ -1,0 +1,6 @@
+﻿kode,nama,kategori')
+lines = [l.strip() for l in csv_raw.splitlines() if l.strip() and ',' in l and not l.strip().startswith('<')]
+print("Header:", lines[0])
+print("First row:", lines[1])
+print("Last row:", lines[-1])
+with open(r'c:\laragon\www\apotek_pos\apotek-pos-local\database\data\obat_import.csv', 'w', encoding='utf-8-sig') as out:

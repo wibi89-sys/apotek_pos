@@ -1,4 +1,18 @@
-<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-6">
+<div x-data="{ showImportModal: false }" class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-6">
+    <!-- Session Alerts -->
+    @if (session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-2xl shadow-2xs flex items-center gap-3">
+            <span class="text-emerald-600 font-bold text-lg">✓</span>
+            <p class="text-xs text-emerald-800 font-bold">{{ session('success') }}</p>
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-2xl shadow-2xs flex items-center gap-3">
+            <span class="text-rose-600 font-bold text-lg">✕</span>
+            <p class="text-xs text-rose-800 font-bold">{{ session('error') }}</p>
+        </div>
+    @endif
+
     <!-- Header Page -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
         <div>
@@ -8,12 +22,27 @@
             </div>
             <p class="text-xs text-slate-500 mt-1">Pencarian fulltext terindeks FEFO (< 50ms) dengan pemantauan kedaluwarsa BPOM</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2.5">
-            <a href="{{ route('purchases.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-xs transition transform hover:-translate-y-0.5">
-                <span>📥</span> + Faktur PBF (Stok Masuk)
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Export Excel Button -->
+            <a href="{{ route('products.export') }}" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition" title="Unduh seluruh database obat ke format Excel (.CSV)">
+                <span>📊</span> <span>Export Excel</span>
             </a>
-            <a href="{{ route('products.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-xs transition transform hover:-translate-y-0.5">
-                <span>💊</span> + Tambah Obat Baru
+
+            <!-- Import Excel Button -->
+            <button
+                type="button"
+                @click="showImportModal = true"
+                class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+            >
+                <span>📥</span> <span>Import Excel</span>
+            </button>
+
+            <a href="{{ route('purchases.create') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition">
+                <span>📑</span> <span class="hidden md:inline">+ Faktur PBF</span>
+            </a>
+
+            <a href="{{ route('products.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition">
+                <span>💊</span> <span>+ Tambah Obat</span>
             </a>
         </div>
     </div>
@@ -182,6 +211,86 @@
         <!-- Pagination Links -->
         <div class="p-4 border-t border-slate-200 bg-slate-50/50">
             {{ $products->links() }}
+        </div>
+    </div>
+
+    <!-- Modal Import Excel / CSV -->
+    <div
+        x-show="showImportModal"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+        x-transition:enter="ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+    >
+        <div
+            @click.away="showImportModal = false"
+            class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 relative transform transition-all"
+        >
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📥</span>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Import Master Data Obat</h3>
+                        <p class="text-xs text-slate-500">Unggah file Excel (.xls, .xlsx) atau CSV</p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    @click="showImportModal = false"
+                    class="text-slate-400 hover:text-slate-600 font-bold text-lg p-1 cursor-pointer"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
+                @csrf
+                
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-xs text-indigo-900 space-y-2">
+                    <div class="font-bold flex items-center justify-between">
+                        <span>💡 Belum punya format tabel yang sesuai?</span>
+                        <a href="{{ route('products.template') }}" class="text-indigo-700 hover:text-indigo-900 font-extrabold underline flex items-center gap-1">
+                            ⬇️ Unduh Format Template CSV
+                        </a>
+                    </div>
+                    <p class="text-[11px] text-indigo-800 leading-relaxed">
+                        Mendukung multi-satuan bertingkat (Beli, Satuan 1-4, Rasio/Isi), harga eceran & resep, tanggal expired FEFO, serta pengelompokan golongan obat otomatis.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Pilih File (.xls, .xlsx, atau .csv)
+                    </label>
+                    <input
+                        type="file"
+                        name="file"
+                        accept=".csv, .xls, .xlsx, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        required
+                        class="block w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-200 rounded-xl cursor-pointer bg-slate-50 p-1"
+                    />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                        type="button"
+                        @click="showImportModal = false"
+                        class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-5 py-2 text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                        <span>🚀</span> <span>Mulai Import</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

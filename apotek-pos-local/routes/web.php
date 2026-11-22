@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Inventory\ProductImportExportController;
 use App\Livewire\Inventory\ProductForm;
 use App\Livewire\Inventory\ProductList;
 use App\Livewire\License\ActivateLicense;
@@ -44,6 +45,9 @@ Route::get('/', function () {
 Route::middleware(['license.valid'])->group(function () {
     Route::get('/products', ProductList::class)->name('products.index');
     Route::get('/products/create', ProductForm::class)->name('products.create');
+    Route::get('/inventory/export', [ProductImportExportController::class, 'export'])->name('products.export');
+    Route::get('/inventory/template', [ProductImportExportController::class, 'template'])->name('products.template');
+    Route::post('/inventory/import', [ProductImportExportController::class, 'import'])->name('products.import');
     Route::get('/purchases/create', PurchaseForm::class)->name('purchases.create');
     
     // Database Management & Maintenance (Owner/Supervisor)
