@@ -9,9 +9,10 @@ use App\Http\Middleware\VerifyLicenseMiddleware;
 use App\Models\Product;
 use App\Models\ProductBatch;
 use App\Models\ProductUnit;
-use App\Services\Inventory\ProductImportExportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Tests\TestCase;
 
 class ProductImportExportTest extends TestCase
@@ -24,9 +25,18 @@ class ProductImportExportTest extends TestCase
         $this->withoutMiddleware([VerifyLicenseMiddleware::class]);
     }
 
-    public function test_can_download_csv_template(): void
+    public function test_can_download_pure_xlsx_template(): void
     {
         $response = $this->get(route('products.template'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $this->assertStringContainsString('Template_Import_Obat.xlsx', (string) $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_can_download_csv_template(): void
+    {
+        $response = $this->get(route('products.template.csv'));
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
@@ -37,7 +47,7 @@ class ProductImportExportTest extends TestCase
         $this->assertStringContainsString('Paracetamol 500mg', $content);
     }
 
-    public function test_can_export_products_to_csv(): void
+    public function test_can_export_products_to_pure_xlsx(): void
     {
         $p = Product::create([
             'sku' => 'MED-TEST-001',
@@ -69,16 +79,44 @@ class ProductImportExportTest extends TestCase
         $response = $this->get(route('products.export'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $this->assertStringContainsString('Data_Obat_Apotek_', (string) $response->headers->get('Content-Disposition'));
-
-        $content = $response->streamedContent();
-        $this->assertStringContainsString('MED-TEST-001', $content);
-        $this->assertStringContainsString('Amoxicillin 500mg Kapsul', $content);
-        $this->assertStringContainsString('BATCH-AMX-99', $content);
+        $this->assertStringContainsString('.xlsx', (string) $response->headers->get('Content-Disposition'));
     }
 
-    public function test_can_import_products_via_web_upload(): void
+    public function test_can_export_products_to_csv(): void
+    {
+        $p = Product::create([
+            'sku' => 'MED-TEST-002',
+            'name' => 'Paracetamol 500mg Tablet',
+            'generic_name' => 'Paracetamol',
+            'drug_class' => DrugClass::BEBAS,
+            'base_unit_name' => 'Tablet',
+            'min_stock_base' => 10,
+        ]);
+
+        ProductUnit::create([
+            'product_id' => $p->id,
+            'unit_name' => 'Tablet',
+            'conversion_factor' => 1,
+            'buy_price' => '300.00',
+            'sell_price' => '500.00',
+            'recipe_price' => '600.00',
+            'is_default_pos' => true,
+        ]);
+
+        $response = $this->get(route('products.export.csv'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('.csv', (string) $response->headers->get('Content-Disposition'));
+
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('MED-TEST-002', $content);
+        $this->assertStringContainsString('Paracetamol 500mg Tablet', $content);
+    }
+
+    public function test_can_import_products_via_web_upload_csv(): void
     {
         $stream = fopen('php://temp', 'r+');
         fputcsv($stream, [
@@ -130,5 +168,44 @@ class ProductImportExportTest extends TestCase
             'unit_name' => 'Strip',
             'conversion_factor' => 10,
         ]);
+    }
+
+    public function test_can_import_products_via_pure_xlsx_file(): void
+    {
+        $ss = new Spreadsheet();
+        $sheet = $ss->getActiveSheet();
+        $sheet->fromArray([
+            ['kode', 'nama', 'kategori', 'stok', 'satuan_beli', 'harga_beli', 'stok_min', 'satuan_1', 'isi_1', 'harga_jual_1', 'satuan_2', 'isi_2', 'harga_jual_2', 'expired', 'komposisi', 'lokasi', 'no_batch'],
+            ['OBT-XLSX-01', 'Omeprazole 20mg', 'Obat Keras', 50, 'Box', 35000, 5, 'Kapsul', 30, 1500, 'Strip', 10, 14000, '25-12-2028', 'Omeprazole 20mg', 'Rak G1', 'BCH-OMZ-01'],
+        ]);
+
+        $tempPath = tempnam(sys_get_temp_dir(), 'test_xlsx_') . '.xlsx';
+        $writer = new Xlsx($ss);
+        $writer->save($tempPath);
+
+        $uploadedFile = new UploadedFile($tempPath, 'master_obat.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+
+        $response = $this->post(route('products.import'), [
+            'file' => $uploadedFile,
+        ]);
+
+        $response->assertRedirect(route('products.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('products', [
+            'sku' => 'OBT-XLSX-01',
+            'name' => 'Omeprazole 20mg',
+            'drug_class' => DrugClass::KERAS->value,
+            'base_unit_name' => 'Kapsul',
+        ]);
+
+        $this->assertDatabaseHas('product_units', [
+            'unit_name' => 'Strip',
+            'conversion_factor' => 10,
+        ]);
+
+        if (file_exists($tempPath)) {
+            @unlink($tempPath);
+        }
     }
 }

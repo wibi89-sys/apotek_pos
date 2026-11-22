@@ -24,8 +24,8 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <!-- Export Excel Button -->
-            <a href="{{ route('products.export') }}" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition" title="Unduh seluruh database obat ke format Excel (.CSV)">
-                <span>📊</span> <span>Export Excel</span>
+            <a href="{{ route('products.export') }}" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition" title="Unduh seluruh database obat ke format Excel Murni (.xlsx)">
+                <span>📊</span> <span>Export Excel (.xlsx)</span>
             </a>
 
             <!-- Import Excel Button -->
@@ -251,14 +251,19 @@
                 @csrf
                 
                 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-xs text-indigo-900 space-y-2">
-                    <div class="font-bold flex items-center justify-between">
+                    <div class="font-bold flex items-center justify-between flex-wrap gap-2">
                         <span>💡 Belum punya format tabel yang sesuai?</span>
-                        <a href="{{ route('products.template') }}" class="text-indigo-700 hover:text-indigo-900 font-extrabold underline flex items-center gap-1">
-                            ⬇️ Unduh Format Template CSV
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('products.template') }}" class="inline-flex items-center gap-1 text-indigo-700 hover:text-indigo-900 font-extrabold underline bg-indigo-100/60 hover:bg-indigo-100 px-2 py-1 rounded-md">
+                                📗 Template Excel (.xlsx)
+                            </a>
+                            <a href="{{ route('products.template.csv') }}" class="text-slate-500 hover:text-slate-700 text-[11px] underline">
+                                (CSV)
+                            </a>
+                        </div>
                     </div>
                     <p class="text-[11px] text-indigo-800 leading-relaxed">
-                        Mendukung multi-satuan bertingkat (Beli, Satuan 1-4, Rasio/Isi), harga eceran & resep, tanggal expired FEFO, serta pengelompokan golongan obat otomatis.
+                        Mendukung multi-satuan bertingkat (Beli, Satuan 1-4, Rasio/Isi), harga eceran & resep, tanggal expired FEFO, serta pengelompokan golongan obat otomatis. Disertai sheet petunjuk pengisian di dalam file Excel.
                     </p>
                 </div>
 

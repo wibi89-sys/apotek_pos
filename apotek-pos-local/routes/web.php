@@ -46,7 +46,9 @@ Route::middleware(['license.valid'])->group(function () {
     Route::get('/products', ProductList::class)->name('products.index');
     Route::get('/products/create', ProductForm::class)->name('products.create');
     Route::get('/inventory/export', [ProductImportExportController::class, 'export'])->name('products.export');
+    Route::get('/inventory/export-csv', [ProductImportExportController::class, 'exportCsv'])->name('products.export.csv');
     Route::get('/inventory/template', [ProductImportExportController::class, 'template'])->name('products.template');
+    Route::get('/inventory/template-csv', [ProductImportExportController::class, 'templateCsv'])->name('products.template.csv');
     Route::post('/inventory/import', [ProductImportExportController::class, 'import'])->name('products.import');
     Route::get('/purchases/create', PurchaseForm::class)->name('purchases.create');
     
