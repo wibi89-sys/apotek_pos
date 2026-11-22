@@ -7,6 +7,8 @@ use App\Livewire\Inventory\ProductForm;
 use App\Livewire\Inventory\ProductList;
 use App\Livewire\License\ActivateLicense;
 use App\Livewire\License\LicenseInfo;
+use App\Livewire\Masters\DoctorManager;
+use App\Livewire\Masters\SupplierManager;
 use App\Livewire\Pos\PosScreen;
 use App\Livewire\Pos\ShiftManager;
 use App\Livewire\Purchases\PurchaseForm;
@@ -15,6 +17,7 @@ use App\Livewire\Reports\SipnapExport;
 use App\Livewire\Settings\DatabaseManager;
 use App\Livewire\Settings\SyncMonitor;
 use App\Livewire\Users\FingerprintEnrollment;
+use App\Livewire\Users\UserManager;
 use App\Models\DbBackupLog;
 use App\Services\Database\DatabaseBackupService;
 use Illuminate\Support\Facades\File;
@@ -52,6 +55,11 @@ Route::middleware(['license.valid'])->group(function () {
     Route::post('/inventory/import', [ProductImportExportController::class, 'import'])->name('products.import');
     Route::get('/purchases/create', PurchaseForm::class)->name('purchases.create');
     
+    // Master Data (Dokter, PBF/Supplier, Pegawai)
+    Route::get('/settings/users', UserManager::class)->name('users.index');
+    Route::get('/masters/doctors', DoctorManager::class)->name('doctors.index');
+    Route::get('/masters/suppliers', SupplierManager::class)->name('suppliers.index');
+
     // Database Management & Maintenance (Owner/Supervisor)
     Route::get('/settings/database', DatabaseManager::class)->name('settings.database');
     Route::get('/settings/database/download/{id}', function (string $id) {

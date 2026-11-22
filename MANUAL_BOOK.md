@@ -59,12 +59,13 @@ Sistem telah dilengkapi skrip peluncur otomatis di folder `/scripts`:
 
 ### Alamat Akses Browser (Manual):
 - **POS Kasir Lokal**: [http://127.0.0.1:8001/pos](http://127.0.0.1:8001/pos)
-- **Informasi Lisensi Lokal**: [http://127.0.0.1:8001/license/info](http://127.0.0.1:8001/license/info)
-- **Master Obat Lokal**: [http://127.0.0.1:8001/products](http://127.0.0.1:8001/products)
+- **Master Obat & Multi-Satuan**: [http://127.0.0.1:8001/products](http://127.0.0.1:8001/products)
+- **Kelola Pegawai & Hak Akses Kasir**: [http://127.0.0.1:8001/settings/users](http://127.0.0.1:8001/settings/users)
+- **Master Data Dokter Resep**: [http://127.0.0.1:8001/masters/doctors](http://127.0.0.1:8001/masters/doctors)
+- **Master Distributor & PBF Obat**: [http://127.0.0.1:8001/masters/suppliers](http://127.0.0.1:8001/masters/suppliers)
 - **Faktur Masuk PBF**: [http://127.0.0.1:8001/purchases/create](http://127.0.0.1:8001/purchases/create)
+- **Informasi Lisensi Lokal**: [http://127.0.0.1:8001/license/info](http://127.0.0.1:8001/license/info)
 - **Database & Maintenance**: [http://127.0.0.1:8001/settings/database](http://127.0.0.1:8001/settings/database)
-- **Dashboard Cloud Hub Owner**: [http://127.0.0.1:8000/admin/dashboard](http://127.0.0.1:8000/admin/dashboard)
-- **Manajemen Lisensi Cloud**: [http://127.0.0.1:8000/admin/licenses](http://127.0.0.1:8000/admin/licenses)
 
 ---
 

@@ -37,6 +37,15 @@
                     <a href="{{ route('products.index') }}" class="px-3 py-2 rounded-lg transition whitespace-nowrap {{ request()->routeIs('products.*') ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
                         📦 Master Obat
                     </a>
+                    <a href="{{ route('doctors.index') }}" class="px-3 py-2 rounded-lg transition whitespace-nowrap {{ request()->routeIs('doctors.*') ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        🩺 Dokter
+                    </a>
+                    <a href="{{ route('suppliers.index') }}" class="px-3 py-2 rounded-lg transition whitespace-nowrap {{ request()->routeIs('suppliers.*') ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        🏢 Supplier
+                    </a>
+                    <a href="{{ route('users.index') }}" class="px-3 py-2 rounded-lg transition whitespace-nowrap {{ request()->routeIs('users.*') ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        👥 Pegawai
+                    </a>
                     <a href="{{ route('purchases.create') }}" class="px-3 py-2 rounded-lg transition whitespace-nowrap {{ request()->routeIs('purchases.*') ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
                         📥 Faktur PBF
                     </a>
@@ -91,6 +100,15 @@
             </a>
             <a href="{{ route('products.index') }}" class="block px-3 py-2 rounded-lg {{ request()->routeIs('products.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
                 📦 Master Obat & Inventori
+            </a>
+            <a href="{{ route('doctors.index') }}" class="block px-3 py-2 rounded-lg {{ request()->routeIs('doctors.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                🩺 Data Dokter Resep
+            </a>
+            <a href="{{ route('suppliers.index') }}" class="block px-3 py-2 rounded-lg {{ request()->routeIs('suppliers.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                🏢 Distributor & PBF
+            </a>
+            <a href="{{ route('users.index') }}" class="block px-3 py-2 rounded-lg {{ request()->routeIs('users.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
+                👥 Pegawai & Hak Akses Kasir
             </a>
             <a href="{{ route('purchases.create') }}" class="block px-3 py-2 rounded-lg {{ request()->routeIs('purchases.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
                 📥 Penerimaan Faktur PBF
