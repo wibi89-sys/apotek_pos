@@ -1,0 +1,29 @@
+# Desktop / Edge Profile
+.desktop_profile/
+*.log
+
+# Python / Hardware Bridge
+hardware-bridge/.venv/
+hardware-bridge/**/__pycache__/
+hardware-bridge/.pytest_cache/
+hardware-bridge/logs/
+*.pyc
+
+# PHP / Laravel
+apotek-pos-local/vendor/
+apotek-pos-local/node_modules/
+apotek-pos-local/public/hot
+apotek-pos-local/public/storage
+apotek-pos-local/storage/*.key
+apotek-pos-local/storage/framework/cache/*
+apotek-pos-local/storage/framework/sessions/*
+apotek-pos-local/storage/framework/views/*
+apotek-pos-local/storage/logs/*
+apotek-pos-local/.env
+apotek-pos-local/.phpunit.result.cache
+
+# IDE / OS
+.idea/
+.vscode/
+Thumbs.db
+[Dd]esktop.ini
